@@ -1,0 +1,140 @@
+PROFESNÍ PROFIL
+
+Senior Data Engineer s 7+ lety zkušeností s návrhem a implementací datových pipeline, ETL/ELT procesů a škálovatelných datových architektur v cloudu. Specializuji se na zpracování velkých objemů dat (batch i streaming), optimalizaci SQL dotazů, návrh datových modelů a budování Data Lake / Data Warehouse řešení.
+
+Zkušenosti zahrnují práci s Pythonem, SQL, Apache Spark, Azure Data Factory, Databricks, PostgreSQL a cloudovými platformami (Azure, AWS).
+
+TECHNICKÉ DOVEDNOSTI
+Programování
+
+Python (pandas, numpy, PySpark)
+
+SQL (T-SQL, PostgreSQL, optimalizace dotazů)
+
+Bash
+
+Data Processing & Frameworky
+
+Apache Spark
+
+Databricks
+
+Azure Data Factory
+
+Apache Kafka
+
+Airflow
+
+Databáze
+
+PostgreSQL
+
+MS SQL Server
+
+MongoDB
+
+Redis
+
+Data Architecture
+
+Data Lake
+
+Data Warehouse
+
+Star Schema
+
+Snowflake Schema
+
+ETL / ELT
+
+CDC (Change Data Capture)
+
+Data Modeling
+
+Partitioning & Indexing
+
+Cloud & DevOps
+
+Azure (Data Factory, Databricks, Data Lake, Fabric)
+
+AWS (S3, RDS)
+
+Docker
+
+CI/CD pipelines
+
+Další
+
+Data quality validation
+
+Performance tuning
+
+Monitoring datových toků
+
+Automatizace datových procesů
+
+PRACOVNÍ ZKUŠENOSTI
+Senior Data Engineer
+
+ABC Analytics | 2021 – současnost
+
+Návrh a implementace ELT pipeline v Azure Data Factory
+
+Zpracování dat o objemu 500+ GB denně pomocí Apache Spark
+
+Návrh Data Lake architektury (Azure Data Lake Storage)
+
+Optimalizace SQL dotazů – zkrácení běhu reportů o 45 %
+
+Implementace data validation vrstvy pro kontrolu kvality dat
+
+Automatizace pipeline a monitoring pomocí CI/CD
+
+Technologie: Python, PySpark, Azure Data Factory, Databricks, PostgreSQL
+
+Data Engineer
+
+XYZ Finance | 2018 – 2021
+
+Budování Data Warehouse řešení (Star Schema)
+
+Návrh ETL procesů z transakčních systémů
+
+Implementace CDC mechanismů
+
+Práce s Kafka streamingem
+
+Tvorba transformační logiky v Pythonu
+
+Technologie: Python, SQL, Kafka, MS SQL, Airflow
+
+KLÍČOVÉ PROJEKTY
+Real-time Streaming Platform
+
+Zpracování 50k+ událostí za sekundu
+
+Kafka + Spark Streaming
+
+Implementace fault-tolerant pipeline
+
+Snížení latence zpracování o 30 %
+
+Enterprise Data Warehouse
+
+Konsolidace 12 zdrojových systémů
+
+Návrh dimenzionálního modelu
+
+Automatizované nightly ETL procesy
+
+Zvýšení kvality reportingu a konzistence dat
+
+VZDĚLÁNÍ
+
+Magisterský titul – Informatika / Datové inženýrství
+
+CERTIFIKACE (volitelné)
+
+Azure Data Engineer Associate
+
+Databricks Certified Data Engineer

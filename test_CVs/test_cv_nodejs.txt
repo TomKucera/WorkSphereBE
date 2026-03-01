@@ -1,0 +1,147 @@
+PROFESNÍ PROFIL
+
+Senior Node.js Backend Developer s více než 8 lety zkušeností s návrhem a vývojem škálovatelných backendových systémů postavených na Node.js (Express, NestJS). Specializuji se na návrh REST API, microservices architekturu, event-driven systémy a optimalizaci výkonu. Mám silné zkušenosti s asynchronním zpracováním, práci s databázemi (PostgreSQL, MongoDB, Redis), Dockerizací a CI/CD pipeline.
+
+Zaměřuji se na čistý kód, testovatelnost, výkon a produkční stabilitu.
+
+TECHNICKÉ DOVEDNOSTI
+Backend
+
+Node.js (8+ let)
+
+TypeScript
+
+Express.js
+
+NestJS
+
+REST API design
+
+GraphQL
+
+Microservices architecture
+
+Event-driven architecture
+
+WebSockets
+
+Databáze
+
+PostgreSQL
+
+MongoDB
+
+Redis
+
+Elasticsearch
+
+Messaging / Event Systems
+
+RabbitMQ
+
+Kafka
+
+DevOps & Cloud
+
+Docker
+
+Docker Compose
+
+Kubernetes (základy)
+
+AWS (EC2, RDS, S3, Lambda)
+
+CI/CD (GitHub Actions, GitLab CI)
+
+Testing
+
+Jest
+
+Mocha
+
+Supertest
+
+Integration testing
+
+E2E testing
+
+Další
+
+Clean Architecture
+
+SOLID principles
+
+Design Patterns
+
+Performance tuning
+
+Code review & mentoring
+
+PRACOVNÍ ZKUŠENOSTI
+Senior Node.js Developer
+
+ABC Tech Solutions | 2020 – současnost
+
+Návrh a implementace škálovatelného REST API v Node.js (NestJS)
+
+Migrace monolitické aplikace na microservices architekturu
+
+Implementace event-driven komunikace přes RabbitMQ
+
+Optimalizace databázových dotazů (PostgreSQL) – snížení latence API o 35 %
+
+Zavedení centralizovaného logování a monitoringu (Prometheus, Grafana)
+
+Dockerizace aplikací a příprava CI/CD pipeline
+
+Code review a mentoring junior vývojářů
+
+Technologie: Node.js, TypeScript, NestJS, PostgreSQL, Redis, RabbitMQ, Docker, AWS
+
+Backend Developer (Node.js)
+
+XYZ Digital | 2017 – 2020
+
+Vývoj REST API pomocí Express.js
+
+Implementace autentizace (JWT, OAuth2)
+
+Integrace třetích stran API
+
+Implementace caching vrstvy pomocí Redis
+
+Psaní unit a integration testů (Jest)
+
+Technologie: Node.js, Express, MongoDB, Redis, Docker
+
+KLÍČOVÉ PROJEKTY
+High-traffic e-commerce backend
+
+Obsluha 1M+ requestů denně
+
+Horizontální škálování pomocí Docker + AWS
+
+Implementace rate limiting a caching strategie
+
+Snížení response time o 40 %
+
+Real-time notifikační systém
+
+WebSocket server v Node.js
+
+Event-driven architektura
+
+Redis Pub/Sub
+
+Podpora 50k souběžných připojení
+
+VZDĚLÁNÍ
+
+Magisterský titul – Informatika
+Technická univerzita
+
+CERTIFIKACE
+
+AWS Certified Developer (volitelné)
+
+Node.js Advanced Concepts (volitelné)
