@@ -5,14 +5,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
 
 from app.db.session import SessionLocal
-from app.db.db_seed import seed_admin
+from app.db.db_seed import seed_users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # STARTUP
     db = SessionLocal()
     try:
-        seed_admin(db)   # ❌ žádné await
+        seed_users(db)   # ❌ žádné await
     finally:
         db.close()
 

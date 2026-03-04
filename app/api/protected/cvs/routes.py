@@ -34,7 +34,7 @@ from app.schemas.base.page import Page
 
 router = APIRouter(prefix="/cvs", tags=["CVs"])
 
-@router.get("", response_model=list[CvListItem])
+@router.get("", response_model=list[CvRead])
 def list_cvs(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),

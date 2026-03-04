@@ -4,24 +4,42 @@ from sqlalchemy.orm import Session
 from app.core.security import hash_password
 from app.db.repositories.user_repository import UserRepository
 
-ADMIN_USER_DATA = {
-    "Login": "admin",
-    # "PasswordHash": hash_password("3402"),
-    "FirstName": "Admin",
-    "LastName": "User",
-    "Active": True,
-}
 
-def seed_admin(db: Session):
+USERS_DATA = [
+    {
+        "Login": "tester",
+        "Password": "WS_2043",
+        "FirstName": "John",
+        "LastName": "Testator",
+        "Active": True,
+    },
+    {
+        "Login": "thomas",
+        "Password": "WS_3402",
+        "FirstName": "Tomáš",
+        "LastName": "Kučera",
+        "Active": True,
+    },
+]
+
+
+def seed_users(db: Session):
     repo = UserRepository(db)
 
-    print("Seeding admin user...")
+    print("Seeding users...")
 
-    user_data = ADMIN_USER_DATA.copy()
-    user_data["PasswordHash"] = hash_password("3402")
+    created_users = []
 
-    try:
-        return repo.create(**user_data)
-    except IntegrityError:
-        db.rollback()
-        return repo.get_by_login(ADMIN_USER_DATA["Login"])
+    for user_data in USERS_DATA:
+        data = user_data.copy()
+        data["PasswordHash"] = hash_password(data.pop("Password"))
+
+        try:
+            user = repo.create(**data)
+        except IntegrityError:
+            db.rollback()
+            user = repo.get_by_login(data["Login"])
+
+        created_users.append(user)
+
+    return created_users
