@@ -43,7 +43,7 @@ def list_cvs(
     return repo.get_by_user(user_id, active=True)
 
 @router.post("/list", response_model=Page[CvListItem])
-def list_applications(
+def list_advanced(
     data: CvListQuery,
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),

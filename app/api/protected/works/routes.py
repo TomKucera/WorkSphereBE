@@ -1,6 +1,6 @@
 from typing import Optional, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.services.cv_matching_service import CvMatchingService
@@ -13,7 +13,9 @@ from app.db.repositories.work_application_repository import WorkApplicationRepos
 
 from app.schemas.base.page import Page
 from app.db.models.work_application import WorkApplication
+from app.db.models.work_description import WorkDescription
 
+from app.schemas.works.work_description_upsert_request import WorkDescriptionUpsertRequest
 from app.schemas.works.work_detail import WorkDetail
 from app.schemas.works.work_list_query import WorkListQuery
 from app.schemas.works.work_list_item import WorkListItem
@@ -25,6 +27,55 @@ router = APIRouter(
     prefix="/works",
     tags=["Works"],
 )
+
+@router.get("/{work_id}/description", response_model=str)
+def get_work_description(
+    work_id: int,
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    work_repo = WorkRepository(db)
+
+    # Check work existence
+    work = work_repo.get(work_id)
+    if not work:
+        raise HTTPException(status_code=404, detail="Work not found")
+
+    entity = work_repo.get_work_description(user_id, work_id)
+
+    if not entity:
+        raise HTTPException(status_code=404, detail="Description override not found")
+
+    return entity.Description
+
+@router.put("/{work_id}/description", status_code=204)
+def upsert_work_description(
+    work_id: int,
+    data: WorkDescriptionUpsertRequest,
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    repo_work = WorkRepository(db)
+    repo_application = WorkApplicationRepository(db)
+
+    work = repo_work.get(work_id)
+    if not work:
+        raise HTTPException(status_code=400, detail="Invalid WorkId")
+
+    if work.RemovedByScanId:
+        raise HTTPException(status_code=400, detail="Work is not active")
+    
+    # Check application (UserId + WorkId)
+    application = repo_application.get_by_user_and_work(user_id, work_id)
+    if application:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot modify description after application has been submitted"
+        )
+
+    repo_work.upsert_work_description(user_id=user_id, work_id=work_id, description=data.Description)
+
+    return Response(status_code=204)
 
 # @router.get("", response_model=list[WorkRead])
 # def list_works(
@@ -55,7 +106,7 @@ router = APIRouter(
 #     )
 
 @router.post("/list", response_model=Page[WorkListItem])
-def list_applications(
+def list_advanced(
     data: WorkListQuery,
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -70,11 +121,17 @@ def list_applications(
 
     work_ids = [w.Id for w in items]
     applications = repo_application.list_by_user_and_work_ids(user_id, work_ids)
+    descriptions = repo_work.get_work_descriptions_by_work_ids(user_id, work_ids)
+
     apps_by_work_id: dict[int, WorkApplication] = { a.WorkId: a for a in applications}
+    descriptions_by_work_id: dict[int, WorkDescription] = { d.WorkId: d for d in descriptions}
 
     for i in items:
         app: WorkApplication = apps_by_work_id.get(i.Id)
-        i.Application = None if app is None else WorkApplicationListItemNested.model_validate(app) # WorkApplicationListItemNested(Id=app.Id, Status=app.Status, CreatedAt=app.CreatedAt,UpdatedAt=app.UpdatedAt)
+        description: WorkDescription = descriptions_by_work_id.get(i.Id)
+        i.Application = None if app is None else WorkApplicationListItemNested.model_validate(app)
+        i.HasCustomDescription = description is not None
+
 
     return Page(
         Items=items,

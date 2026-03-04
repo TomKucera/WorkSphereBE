@@ -27,6 +27,7 @@ class WorkListItem(ApiBaseModel):
     RemovedByScan: ScanListItemNested | None
 
     Application: WorkApplicationListItemNested | None
+    HasCustomDescription: bool
 
     class Config:
         from_attributes = True

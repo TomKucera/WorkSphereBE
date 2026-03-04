@@ -1,5 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload, aliased
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects import mssql
 from sqlalchemy import select, and_, or_, func, asc, desc, exists
 from sqlalchemy.sql import Select
@@ -7,6 +8,7 @@ from datetime import timedelta
 
 from app.db.models.scan import Scan
 from app.db.models.work import Work
+from app.db.models.work_description import WorkDescription
 from app.db.models.work_application import WorkApplication
 from app.schemas.works.work_list_query import WorkListQuery
 from app.schemas.works.work_list_item import WorkListItem
@@ -21,6 +23,46 @@ class WorkRepository:
     # ------------------------------------------------------------------
     def get(self, work_id: int) -> Optional[Work]:
         return self.db.get(Work, work_id)
+    
+    # ------------------------------------------------------------------
+    # UPSERT DESCRIPTION
+    # ------------------------------------------------------------------
+    def get_work_description(self, user_id: int, work_id: int) -> Optional[WorkDescription]:
+        return self.db.get(WorkDescription,{"UserId": user_id, "WorkId": work_id})
+    
+    def get_work_descriptions_by_work_ids(self, user_id: int, work_ids: list[int]) -> list[WorkDescription]:
+        if not work_ids:
+            return []
+
+        stmt = (
+            select(WorkDescription)
+            .where(WorkDescription.UserId == user_id, WorkDescription.WorkId.in_(work_ids))
+        )
+
+        return list(self.db.scalars(stmt).all())
+    
+    def upsert_work_description(self, user_id: int, work_id: int, description: str) -> WorkDescription:
+        """
+        Insert or update user-specific work description.
+        Composite PK: (UserId, WorkId)
+        """
+
+        entity = self.db.get(WorkDescription, {"UserId": user_id, "WorkId": work_id})
+
+        if entity:
+            entity.Description = description
+            # UpdatedAt se nastaví přes onupdate=func.sysutcdatetime()
+        else:
+            entity = WorkDescription(
+                UserId=user_id,
+                WorkId=work_id,
+                Description=description,
+            )
+            self.db.add(entity)
+
+        self.db.commit()
+        self.db.refresh(entity)
+        return entity
 
     # # ------------------------------------------------------------------
     # # LIST (latest active)

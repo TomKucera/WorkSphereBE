@@ -25,13 +25,32 @@ router = APIRouter(prefix="/applications", tags=["Work Applications"])
 
 
 @router.get("", response_model=list[WorkApplicationResponse])
-def list_applications(
+def list(
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     repo = WorkApplicationRepository(db)
     return repo.list_by_user(user_id)
 
+@router.get("/by-work/{work_id}", response_model=WorkApplicationResponse)
+async def get_application_by_work(
+    work_id: int,
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Returns application of current user for given work_id.
+    """
+
+    repo_application = WorkApplicationRepository(db)
+    applications = repo_application.list_by_user_and_work_ids(user_id, [work_id])
+
+    application = None if len(applications) != 1 else applications[0]
+
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    return application
 
 # @router.get("", response_model=Page[WorkApplicationListItem])
 # def list_applications(
@@ -54,7 +73,7 @@ def list_applications(
 #     )
 
 @router.post("/list", response_model=Page[WorkApplicationListItem])
-def list_applications(
+def list_advanced(
     data: WorkApplicationListQuery,
     user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),

@@ -1,5 +1,6 @@
 /*
 DROP TABLE IF EXISTS [user].[WorkApplications];
+DROP TABLE IF EXISTS [user].[WorkDescriptions]
 DROP TABLE IF EXISTS [user].[CvRags];
 DROP TABLE IF EXISTS [user].[CVs];
 DROP TABLE IF EXISTS [user].[UserContacts];
@@ -115,4 +116,22 @@ CREATE TABLE [user].[WorkApplications] (
     CONSTRAINT CK_WorkApplications_Status
         CHECK ([Status] IN ('SUBMITTED','VIEWED','REJECTED','ACCEPTED'))
 );
+
+
+CREATE TABLE [user].[WorkDescriptions] (
+    [UserId]      INT NOT NULL,
+    [WorkId]      INT NOT NULL,
+    [Description] NVARCHAR(MAX) NOT NULL,
+    [UpdatedAt]   DATETIME2(7) NOT NULL DEFAULT SYSUTCDATETIME(),
+
+    CONSTRAINT PK_WorkDescriptions PRIMARY KEY ([UserId], [WorkId]),
+
+    CONSTRAINT FK_WorkDescriptions_Users
+        FOREIGN KEY ([UserId]) REFERENCES [user].[Users]([Id]),
+
+    CONSTRAINT FK_WorkDescriptions_Works
+        FOREIGN KEY ([WorkId]) REFERENCES [dbo].[Works]([Id])
+);
+
 GO
+

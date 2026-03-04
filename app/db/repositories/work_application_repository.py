@@ -36,7 +36,7 @@ class WorkApplicationRepository:
             .all()
         )
 
-    def list_by_user_and_work_ids(self,user_id: int,work_ids: list[int]) -> list[WorkApplication]:
+    def list_by_user_and_work_ids(self,user_id: int, work_ids: list[int]) -> list[WorkApplication]:
 
         if not work_ids:
             return []

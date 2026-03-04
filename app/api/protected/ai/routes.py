@@ -41,7 +41,11 @@ def generate_cover_letter(
     if not work:
         raise HTTPException(status_code=404, detail="Work not found")
     
-    if not len(work.Description):
+    work_description = work_repo.get_work_description(user_id, work_id)
+
+    job_description = work.Description if work_description is None else work_description.Description
+    
+    if not len(job_description):
         raise HTTPException(status_code=422, detail="Work has no description and cannot be used for generation")
 
     cv = cv_repo.get(cv_id, user_id, active=None)
@@ -51,7 +55,7 @@ def generate_cover_letter(
     if not cv.Active:
         raise HTTPException(status_code=409, detail="CV is inactive and cannot be used for generation")
     
-    job_description = ScrapingService.strip_html(work.Description)
+    job_description = ScrapingService.strip_html(job_description)
     cv_text = cv.ExtractedText
 
     service = CoverLetterService()
@@ -65,11 +69,11 @@ def generate_cover_letter(
     )
 
     return CoverLetterResponse(
-        job_description=job_description,
-        cv_text=cv_text,
-        body=result["body"],
-        match_score=result["match_score"],
-        job_skills=result["job_skills"],
-        cv_skills=result["cv_skills"],
-        generation_info=result["generation_info"],
+        JobDescription=job_description,
+        CvText=cv_text,
+        Body=result["body"],
+        MatchScore=result["match_score"],
+        JobSkills=result["job_skills"],
+        CvSkills=result["cv_skills"],
+        # GenerationInfo=result["generation_info"],
     )
