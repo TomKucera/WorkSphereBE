@@ -11,12 +11,18 @@ ApplicationStatus = Literal[
     "ACCEPTED",
 ]
 
+ApplicationType = Literal[
+    "MANUAL",
+    "AUTO",
+]
+
 class WorkApplicationCreate(ApiBaseModel):
     WorkId: int
     CvId: int
     ContactEmailId: int
     ContactPhoneId: int
     Message: constr(max_length=1000) | None = None   # type: ignore
+    AutoApply: bool = False
 
 class WorkApplicationUpdate(ApiBaseModel):
     Status: ApplicationStatus | None = None

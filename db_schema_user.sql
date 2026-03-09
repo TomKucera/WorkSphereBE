@@ -117,6 +117,9 @@ CREATE TABLE [user].[WorkApplications] (
         CHECK ([Status] IN ('SUBMITTED','VIEWED','REJECTED','ACCEPTED'))
 );
 
+ALTER TABLE [user].[WorkApplications] ADD [ApplicationType] NVARCHAR(20) NOT NULL DEFAULT 'MANUAL';
+ALTER TABLE [user].[WorkApplications] ADD CONSTRAINT CK_WorkApplications_ApplicationType CHECK ([ApplicationType] IN ('MANUAL', 'AUTO'));
+
 
 CREATE TABLE [user].[WorkDescriptions] (
     [UserId]      INT NOT NULL,

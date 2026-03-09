@@ -22,6 +22,10 @@ class WorkApplication(Base):
             "[Status] IN ('SUBMITTED','VIEWED','REJECTED','ACCEPTED')",
             name="CK_WorkApplications_Status",
         ),
+        CheckConstraint(
+            "[ApplicationType] IN ('MANUAL','AUTO')",
+            name="CK_WorkApplications_ApplicationType",
+        ),
         {"schema": "user"},
     )
 
@@ -62,6 +66,13 @@ class WorkApplication(Base):
         nullable=False,
         default="SUBMITTED",
         server_default="SUBMITTED",
+    )
+
+    ApplicationType = Column(
+        NVARCHAR(20),
+        nullable=False,
+        default="MANUAL",
+        server_default="MANUAL",
     )
 
     CreatedAt = Column(

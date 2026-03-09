@@ -2,7 +2,7 @@ from app.schemas.base.base_model import ApiBaseModel
 from datetime import datetime
 
 from app.schemas.users.work_application import (
-    ApplicationStatus
+    ApplicationStatus, ApplicationType
 )
 
 from app.schemas.works.work_list_item_nested import (
@@ -25,6 +25,7 @@ class WorkApplicationListItem(ApiBaseModel):
     Message: str | None
 
     Status: ApplicationStatus
+    ApplicationType: ApplicationType
 
     CreatedAt: datetime
     UpdatedAt: datetime | None
