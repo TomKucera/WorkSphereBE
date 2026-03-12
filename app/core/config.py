@@ -12,6 +12,14 @@ class Settings:
             "JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
             60,
         )
+        self.GOOGLE_CLIENT_ID: str | None = os.getenv("GOOGLE_CLIENT_ID")
+        self.GOOGLE_CLIENT_SECRET: str | None = os.getenv("GOOGLE_CLIENT_SECRET")
+        self.GOOGLE_REDIRECT_URI: str | None = os.getenv("GOOGLE_REDIRECT_URI")
+        self.GOOGLE_GMAIL_SCOPES: str = os.getenv(
+            "GOOGLE_GMAIL_SCOPES",
+            "https://www.googleapis.com/auth/gmail.readonly",
+        )
+        self.GMAIL_TOKEN_ENCRYPTION_KEY: str | None = os.getenv("GMAIL_TOKEN_ENCRYPTION_KEY")
 
     @staticmethod
     def _require_env(name: str) -> str:

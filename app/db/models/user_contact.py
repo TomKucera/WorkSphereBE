@@ -21,6 +21,10 @@ class UserContact(Base):
             "[Type] IN ('Email','Phone')",
             name="CK_UserContacts_Type",
         ),
+        CheckConstraint(
+            "[ConfigJson] IS NULL OR ISJSON([ConfigJson]) = 1",
+            name="CK_UserContacts_ConfigJson_IsJson",
+        ),
         Index(
             "UX_UserContacts_Primary",
             "UserId",
@@ -42,6 +46,7 @@ class UserContact(Base):
 
     Type = Column(NVARCHAR(20), nullable=False)
     Value = Column(NVARCHAR(100), nullable=False)
+    ConfigJson = Column(NVARCHAR(None), nullable=True)
 
     IsPrimary = Column(Boolean, nullable=False, default=False, server_default="0")
     Active = Column(Boolean, nullable=False, default=True, server_default="1")

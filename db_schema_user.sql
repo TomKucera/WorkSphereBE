@@ -138,3 +138,97 @@ CREATE TABLE [user].[WorkDescriptions] (
 
 GO
 
+/* ====================================================================== */
+/* MIGRATION APPEND: Add UserContacts.ConfigJson for integration settings */
+/* Purpose: Store provider config (e.g., Gmail OAuth refresh token data)  */
+/*
+Example usage (store minimal Gmail connection config):
+
+UPDATE [user].[UserContacts]
+SET [ConfigJson] = N'{
+  "gmail": {
+    "google_email": "name@gmail.com",
+    "refresh_token_enc": "ENC(...)",
+    "scopes": ["https://www.googleapis.com/auth/gmail.readonly"]
+  }
+}'
+WHERE [Id] = 123
+  AND [Type] = 'Email';
+*/
+/* ====================================================================== */
+
+IF COL_LENGTH('user.UserContacts', 'ConfigJson') IS NULL
+BEGIN
+    ALTER TABLE [user].[UserContacts]
+    ADD [ConfigJson] NVARCHAR(MAX) NULL;
+END
+GO
+
+/* ====================================================================== */
+/* MIGRATION APPEND: Add InboxMessages for relevant imported email items   */
+/* Purpose: Store only work-related inbox messages copied from Gmail       */
+/*
+Workflow:
+- sync imports only relevant Gmail messages for one email contact
+- messages are stored as inbox items
+- user can later assign a message to WorkApplication or delete it
+*/
+/* ====================================================================== */
+
+IF OBJECT_ID('[user].[InboxMessages]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [user].[InboxMessages] (
+        [Id]                INT IDENTITY(1,1) PRIMARY KEY,
+        [UserId]            INT NOT NULL,
+        [UserContactId]     INT NOT NULL,
+        [WorkApplicationId] INT NULL,
+        [GmailMessageId]    NVARCHAR(128) NOT NULL,
+        [GmailThreadId]     NVARCHAR(128) NULL,
+        [FromEmail]         NVARCHAR(500) NULL,
+        [ToEmail]           NVARCHAR(500) NULL,
+        [Subject]           NVARCHAR(500) NULL,
+        [Snippet]           NVARCHAR(1000) NULL,
+        [ReceivedAt]        DATETIME2(7) NOT NULL,
+        [ImportedAt]        DATETIME2(7) NOT NULL DEFAULT SYSUTCDATETIME(),
+        [ImportRunId]       NVARCHAR(36) NOT NULL,
+        [Active]            BIT NOT NULL DEFAULT 1,
+        [DeletedAt]         DATETIME2(7) NULL,
+
+        CONSTRAINT FK_InboxMessages_Users
+            FOREIGN KEY ([UserId]) REFERENCES [user].[Users]([Id]),
+
+        CONSTRAINT FK_InboxMessages_UserContacts
+            FOREIGN KEY ([UserContactId]) REFERENCES [user].[UserContacts]([Id]),
+
+        CONSTRAINT FK_InboxMessages_WorkApplications
+            FOREIGN KEY ([WorkApplicationId]) REFERENCES [user].[WorkApplications]([Id]),
+
+        CONSTRAINT UQ_InboxMessages_User_Contact_GmailMessage
+            UNIQUE ([UserId], [UserContactId], [GmailMessageId])
+    );
+END
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE [name] = 'IX_InboxMessages_User_Contact_ReceivedAt'
+      AND [object_id] = OBJECT_ID('[user].[InboxMessages]')
+)
+BEGIN
+    CREATE INDEX IX_InboxMessages_User_Contact_ReceivedAt
+    ON [user].[InboxMessages] ([UserId], [UserContactId], [ReceivedAt]);
+END
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE [name] = 'CK_UserContacts_ConfigJson_IsJson'
+)
+BEGIN
+    ALTER TABLE [user].[UserContacts]
+    ADD CONSTRAINT CK_UserContacts_ConfigJson_IsJson
+    CHECK ([ConfigJson] IS NULL OR ISJSON([ConfigJson]) = 1);
+END
+GO

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 TOKEN_FILE = "token.json"
 CREDS_FILE = "/Users/tomaskucera/Downloads/client_secret_684195231984-ib1f0l18k84qr676bd2pivqadlnsd8ov.apps.googleusercontent.com.json"
-
+# export GOOGLE_OAUTH_CLIENT_SECRETS_PATH="/Users/tomaskucera/Downloads/client_secret_684195231984-ib1f0l18k84qr676bd2pivqadlnsd8ov.apps.googleusercontent.com.json"
 def get_gmail_service():
     creds = None
 
