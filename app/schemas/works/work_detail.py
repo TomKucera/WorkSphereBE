@@ -23,6 +23,7 @@ class WorkDetail(ApiBaseModel):
     SalaryCurrency: str | None
     SalaryMax: int | None
     SalaryMin: int | None
+    MarkedForLater: bool
 
     class Config:
         from_attributes = True

@@ -232,3 +232,28 @@ BEGIN
     CHECK ([ConfigJson] IS NULL OR ISJSON([ConfigJson]) = 1);
 END
 GO
+
+/* ====================================================================== */
+/* MIGRATION APPEND: Add WorkBookmarks for "return later" work marking     */
+/* Purpose: Store simple user mark for works the user wants to revisit     */
+/* ====================================================================== */
+
+IF OBJECT_ID('[user].[WorkBookmarks]', 'U') IS NULL
+BEGIN
+    CREATE TABLE [user].[WorkBookmarks] (
+        [Id]        INT IDENTITY(1,1) PRIMARY KEY,
+        [UserId]    INT NOT NULL,
+        [WorkId]    INT NOT NULL,
+        [CreatedAt] DATETIME2(7) NOT NULL DEFAULT SYSUTCDATETIME(),
+
+        CONSTRAINT FK_WorkBookmarks_Users
+            FOREIGN KEY ([UserId]) REFERENCES [user].[Users]([Id]),
+
+        CONSTRAINT FK_WorkBookmarks_Works
+            FOREIGN KEY ([WorkId]) REFERENCES [dbo].[Works]([Id]),
+
+        CONSTRAINT UQ_WorkBookmarks_User_Work
+            UNIQUE ([UserId], [WorkId])
+    );
+END
+GO

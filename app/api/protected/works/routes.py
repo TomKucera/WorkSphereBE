@@ -9,6 +9,7 @@ from app.services.scraping_service import ScrapingService
 from app.db.deps import get_db
 from app.core.auth import get_current_user
 from app.db.repositories.work_repository import WorkRepository
+from app.db.repositories.work_bookmark_repository import WorkBookmarkRepository
 from app.db.repositories.work_application_repository import WorkApplicationRepository
 
 from app.schemas.base.page import Page
@@ -16,6 +17,7 @@ from app.db.models.work_application import WorkApplication
 from app.db.models.work_description import WorkDescription
 
 from app.schemas.works.work_description_upsert_request import WorkDescriptionUpsertRequest
+from app.schemas.works.work_bookmark_update import WorkBookmarkUpdate
 from app.schemas.works.work_detail import WorkDetail
 from app.schemas.works.work_list_query import WorkListQuery
 from app.schemas.works.work_list_item import WorkListItem
@@ -115,6 +117,7 @@ def list_advanced(
     Returns paginated, sorted and filtered list of works.
     """
     repo_work = WorkRepository(db)
+    repo_bookmark = WorkBookmarkRepository(db)
     repo_application = WorkApplicationRepository(db)
 
     items, total = repo_work.list(user_id, data)
@@ -122,6 +125,7 @@ def list_advanced(
     work_ids = [w.Id for w in items]
     applications = repo_application.list_by_user_and_work_ids(user_id, work_ids)
     descriptions = repo_work.get_work_descriptions_by_work_ids(user_id, work_ids)
+    bookmarked_work_ids = repo_bookmark.list_marked_work_ids(user_id, work_ids)
 
     apps_by_work_id: dict[int, WorkApplication] = { a.WorkId: a for a in applications}
     descriptions_by_work_id: dict[int, WorkDescription] = { d.WorkId: d for d in descriptions}
@@ -131,6 +135,7 @@ def list_advanced(
         description: WorkDescription = descriptions_by_work_id.get(i.Id)
         i.Application = None if app is None else WorkApplicationListItemNested.model_validate(app)
         i.HasCustomDescription = description is not None
+        i.MarkedForLater = i.Id in bookmarked_work_ids
 
 
     return Page(
@@ -144,9 +149,11 @@ def list_advanced(
 @router.get("/{work_id}", response_model=WorkDetail)
 def get_work(
     work_id: int,
+    user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     repo = WorkRepository(db)
+    repo_bookmark = WorkBookmarkRepository(db)
     work = repo.get(work_id)
 
     # work.Description = "Hledáme spolehlivého, pracovitého, ale také pohodového kolegu/kolegyni se smyslem pro humor, který/á se rád věnuje IT.\nPožadujeme znalost Python a jeho frameworku Django / Django Rest Framework.\nNáplní práce nového kolegy/ně bude:\nVedení juniorních backend vývojářů (Django, Django Rest Framework)\nKomunikace s kolegy\nPráce s Gitem\nCodereview\nNávrh řešení backendu aplikací\nVývoj složitých částí backendu v Djangu / Django Rest Frameworku nebo FastAPI\nNa jak dlouho?\nJe možnost pracovat per-project\nJe možné spolupracovat dlouhodobě\nKomu by mohla tato pozice vyhovovat?\nNěkdo, kdo má své zakázky, ale rád by souběžně vyzkoušel i práci v agentuře\nNěkdo, kdo chce změnu oproti korporátu\nNěkdo, kdo si chce šáhnout na vývoj pomocí moderních technologií(Django 3, FastAPI)\nNaše firemní kultura:\nInovativnost - Nové technologie, otevřenost návrhům a změnám\nPřátelské pracovní prostředí - Otevřená komunikace, důvěrné vztahy, pivo s ředitelem, neformálnost\nFairplay - Ve firmě i mimo ni, spokojenost zaměstnanců, spokojenost klientů, transparentnost\nProaktivita - Realizace vlastních nápadů, angažovanost\nFlexibilita - Otevřená/nestriktní pravidla, home office"
@@ -158,7 +165,31 @@ def get_work(
     if not work:
         raise HTTPException(status_code=404, detail="Work not found")
 
+    work.MarkedForLater = repo_bookmark.is_marked(user_id, work_id)
     return work
+
+
+@router.patch("/{work_id}/mark-for-later", status_code=204)
+def set_work_marked_for_later(
+    work_id: int,
+    data: WorkBookmarkUpdate,
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    repo_work = WorkRepository(db)
+    repo_bookmark = WorkBookmarkRepository(db)
+
+    work = repo_work.get(work_id)
+    if not work:
+        raise HTTPException(status_code=404, detail="Work not found")
+
+    if data.MarkedForLater:
+        if not repo_bookmark.is_marked(user_id, work_id):
+            repo_bookmark.create(user_id, work_id)
+    else:
+        repo_bookmark.delete(user_id, work_id)
+
+    return Response(status_code=204)
 
 @router.get("/{work_id}/scrape", response_model=WorkScrapeResponse)
 def scrape_work(
@@ -189,18 +220,30 @@ def scrape_work(
 def list_works_by_provider(
     provider: str,
     limit: int = 50,
+    user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     repo = WorkRepository(db)
-    return repo.list_by_provider(provider, limit)
+    repo_bookmark = WorkBookmarkRepository(db)
+    items = repo.list_by_provider(provider, limit)
+    bookmarked_work_ids = repo_bookmark.list_marked_work_ids(user_id, [item.Id for item in items])
+    for item in items:
+        item.MarkedForLater = item.Id in bookmarked_work_ids
+    return items
 
 @router.get("/scan/{scan_id}", response_model=list[WorkDetail])
 def list_works_by_scan(
     scan_id: int,
+    user_id: int = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     repo = WorkRepository(db)
-    return repo.list_by_scan(scan_id)
+    repo_bookmark = WorkBookmarkRepository(db)
+    items = repo.list_by_scan(scan_id)
+    bookmarked_work_ids = repo_bookmark.list_marked_work_ids(user_id, [item.Id for item in items])
+    for item in items:
+        item.MarkedForLater = item.Id in bookmarked_work_ids
+    return items
 
 @router.post("/{work_id}/match-cvs")
 def match_cvs(
@@ -210,4 +253,3 @@ def match_cvs(
 ):
     service = CvMatchingService(db)
     return service.match(user_id, work_id)
-

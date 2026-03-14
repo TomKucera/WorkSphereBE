@@ -28,6 +28,7 @@ class WorkListItem(ApiBaseModel):
 
     Application: WorkApplicationListItemNested | None
     HasCustomDescription: bool
+    MarkedForLater: bool
 
     class Config:
         from_attributes = True
